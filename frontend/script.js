@@ -2,17 +2,6 @@ console.log("connected")
 
 const buttons = document.querySelectorAll(".navigation_btn>button")
 
-const buttonObj = {
-    isActive: false,
-    buttonName: ""
-}
-
-const estado = new Proxy(buttonObj, {
-    set(target, property, value) {
-        target[property] = value;
-        renderView(target.buttonName);
-    }
-});
 
 buttons.forEach(button => {
     button.addEventListener("click", () => {
@@ -25,6 +14,7 @@ buttons.forEach(button => {
     });
 
 });
+
 
 
 async function renderView(pageName) {
@@ -62,7 +52,7 @@ async function renderView(pageName) {
                     <th>Aprobado</th>
                 </thead>
                 ${alumnos.map((alumno) => `
-                    <tr>
+                    <tr onclick="obtenerAlumnoPorId(${alumno.id})" style="cursor: pointer;">
                         <td>${alumno.id}</td>
                         <td>${alumno.nombre}</td>
                         <td>${alumno.edad}</td>
@@ -137,5 +127,25 @@ async function obtenerAlumnos() {
     }
 
 
+}
+
+async function obtenerAlumnoPorId(alumnoId) {
+    console.log("Mouse/click sobre alumno con ID:", alumnoId);
+
+    try {
+        var response = await fetch(`http://localhost:8080/alumnos/${alumnoId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        var alumno = await response.json();
+        console.log("Datos del alumno:", alumno);
+        return alumno;
+
+    } catch (err) {
+        console.log("Error al obtener alumno por ID:", err);
+    }
 }
 
