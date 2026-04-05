@@ -22,15 +22,32 @@ type Alumno struct {
 	Aprobado bool   `json:"aprobado"`
 }
 
+func enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 
 	cargarDatosPrueba()
 
-	http.HandleFunc("GET /alumnos", obtenerAlumnos)
-	http.HandleFunc("GET /alumnos/{id}", obtenerAlumnoPorId)
-	http.HandleFunc("POST /alumnos", crearAlumno)
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /alumnos", obtenerAlumnos)
+	mux.HandleFunc("GET /alumnos/{id}", obtenerAlumnoPorId)
+	mux.HandleFunc("POST /alumnos", crearAlumno)
+
 	fmt.Println("Servidor corriendo en http://localhost:8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", enableCORS(mux))
 
 }
 
@@ -67,50 +84,51 @@ func obtenerAlumnoPorId(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Id invalido", http.StatusBadRequest)
 		return
 	}
-	
+
 	for _, a := range alumnos {
 		if a.Id == id {
 			json.NewEncoder(w).Encode(a)
 			return
 		}
 	}
-	http.Error(w, "Alumno no encontrado", http.StatusNotFound)	
+	http.Error(w, "Alumno no encontrado", http.StatusNotFound)
 }
 
 func crearAlumno(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-    var nuevo Alumno
-    err := json.NewDecoder(r.Body).Decode(&nuevo)
-    if err != nil {
-        http.Error(w, "JSON invalido", http.StatusBadRequest)
-        return
-    }
+	var nuevo Alumno
+	err := json.NewDecoder(r.Body).Decode(&nuevo)
+	if err != nil {
+		http.Error(w, "JSON invalido", http.StatusBadRequest)
+		return
+	}
 
-    if strings.TrimSpace(nuevo.Nombre) == "" {
-        http.Error(w, "Nombre obligatorio", http.StatusBadRequest)
-        return
-    }
+	if strings.TrimSpace(nuevo.Nombre) == "" {
+		http.Error(w, "Nombre obligatorio", http.StatusBadRequest)
+		return
+	}
 
-    if strings.TrimSpace(nuevo.Carrera) == "" {
-        http.Error(w, "Carrera obligatoria", http.StatusBadRequest)
-        return
-    }
-    if nuevo.Edad <= 0 {
-        http.Error(w, "Edad invalida", http.StatusBadRequest)
-        return
-    }
-    if nuevo.Promedio < 0 || nuevo.Promedio > 100 {
-        http.Error(w, "Promedio invalido", http.StatusBadRequest)
-        return
-    }
+	if strings.TrimSpace(nuevo.Carrera) == "" {
+		http.Error(w, "Carrera obligatoria", http.StatusBadRequest)
+		return
+	}
+	if nuevo.Edad <= 0 {
+		http.Error(w, "Edad invalida", http.StatusBadRequest)
+		return
+	}
+	if nuevo.Promedio < 0 || nuevo.Promedio > 100 {
+		http.Error(w, "Promedio invalido", http.StatusBadRequest)
+		return
+	}
 
-    nuevo.Id = numeroId
-    nuevo.Aprobado = nuevo.Promedio >= 70
-    numeroId++
+	nuevo.Id = numeroId
+	nuevo.Aprobado = nuevo.Promedio >= 70
+	numeroId++
 
-    alumnos = append(alumnos, nuevo)
+	alumnos = append(alumnos, nuevo)
+	fmt.Println("Alumno creado", nuevo)
 
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(nuevo)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(nuevo)
 }
