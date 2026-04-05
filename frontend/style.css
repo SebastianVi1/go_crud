@@ -11,6 +11,8 @@ body {
     margin: 0;
     padding: 0;
     background-color: var(--body-bg);
+    width: 100vw;
+    height: 100vh;
 }
 
 main {
@@ -110,4 +112,23 @@ form>button:hover {
     scale: 1.1;
     color: #fff;
     text-shadow: 0 0 10px #0004;
+}
+
+.dinamic_content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.table_alumnos {
+    width: 80%;
+
+}
+
+td,
+th {
+    border-bottom: 1px solid black;
+    padding: 5px
 }

@@ -27,7 +27,7 @@ buttons.forEach(button => {
 });
 
 
-function renderView(pageName) {
+async function renderView(pageName) {
     switch (pageName) {
         case "Agregar":
             var dinamic_content = document.querySelector(".dinamic_content");
@@ -48,6 +48,31 @@ function renderView(pageName) {
             `
             break;
         case "Mostrar":
+            var dinamic_content = document.querySelector(".dinamic_content");
+            var alumnos = await obtenerAlumnos();
+
+            dinamic_content.innerHTML = `
+            <table class="table_alumnos">
+                <thead>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Edad</th>
+                    <th>Carrera</th>
+                    <th>Promedio</th>
+                    <th>Aprobado</th>
+                </thead>
+                ${alumnos.map((alumno) => `
+                    <tr>
+                        <td>${alumno.id}</td>
+                        <td>${alumno.nombre}</td>
+                        <td>${alumno.edad}</td>
+                        <td>${alumno.carrera}</td>
+                        <td>${alumno.promedio}</td>
+                        <td>${alumno.aprobado ? "Si" : "No"}</td>
+                    </tr>
+                `).join('')}
+                </tbody>
+            </table>`
             break;
         case "Actualizar":
             break;
@@ -89,8 +114,28 @@ async function guardarAlumno() {
 
 function clearData() {
     var inputs = document.querySelectorAll("input");
-
     inputs.forEach(input => {
         input.value = "";
     });
 }
+
+async function obtenerAlumnos() {
+
+    try {
+        var response = await fetch('http://localhost:8080/alumnos', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        var alumnos = await response.json();
+        console.log(alumnos);
+        return alumnos;
+
+    } catch (error) {
+        console.log("Error:" + error);
+    }
+
+
+}
+
