@@ -22,6 +22,26 @@ type Alumno struct {
 	Aprobado bool   `json:"aprobado"`
 }
 
+
+
+func main() {
+
+	cargarDatosPrueba()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /alumnos", obtenerAlumnos)
+	mux.HandleFunc("GET /alumnos/{id}", obtenerAlumnoPorId)
+	mux.HandleFunc("POST /alumnos", crearAlumno)
+	mux.HandleFunc("PUT /alumnos", modificarAlumno)
+	mux.HandleFunc("DELETE /alumnos", borrarAlumno)
+
+	fmt.Println("Servidor corriendo en http://localhost:8080")
+	http.ListenAndServe(":8080", enableCORS(mux))
+
+}
+
+
+
 func enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -37,19 +57,6 @@ func enableCORS(next http.Handler) http.Handler {
 	})
 }
 
-func main() {
-
-	cargarDatosPrueba()
-
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /alumnos", obtenerAlumnos)
-	mux.HandleFunc("GET /alumnos/{id}", obtenerAlumnoPorId)
-	mux.HandleFunc("POST /alumnos", crearAlumno)
-
-	fmt.Println("Servidor corriendo en http://localhost:8080")
-	http.ListenAndServe(":8080", enableCORS(mux))
-
-}
 
 func cargarDatosPrueba() {
 	datos := []Alumno{
@@ -132,4 +139,67 @@ func crearAlumno(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(nuevo)
+}
+
+func borrarAlumno(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Println("Eliminando alumno")
+	var body struct {
+		Id int `json:"id"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&body)
+	if err != nil {
+		http.Error(w, "JSON invalido", http.StatusBadRequest)
+		return
+	}
+
+	for i, a := range alumnos {
+		if a.Id == body.Id {
+			// Eliminar del slice
+			alumnos = append(alumnos[:i], alumnos[i+1:]...)
+			fmt.Println("Alumno eliminado", a)
+			
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(map[string]string{"mensaje": "Alumno eliminado exitosamente"})
+			return
+		}
+	}
+
+	http.Error(w, "Alumno no encontrado", http.StatusNotFound)
+}
+
+func modificarAlumno(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	var cuerpo Alumno
+	err := json.NewDecoder(r.Body).Decode(&cuerpo)
+	if err != nil {
+		http.Error(w, "JSON invalido", http.StatusBadRequest)
+		return
+	}
+
+	for i, a := range alumnos {
+		if a.Id == cuerpo.Id {
+			if strings.TrimSpace(cuerpo.Nombre) != "" {
+				alumnos[i].Nombre = cuerpo.Nombre
+			}
+			if cuerpo.Edad > 0 {
+				alumnos[i].Edad = cuerpo.Edad
+			}
+			if strings.TrimSpace(cuerpo.Carrera) != "" {
+				alumnos[i].Carrera = cuerpo.Carrera
+			}
+			if cuerpo.Promedio >= 0 && cuerpo.Promedio <= 100 {
+				alumnos[i].Promedio = cuerpo.Promedio
+				alumnos[i].Aprobado = cuerpo.Promedio >= 70
+			}
+
+			fmt.Println("Alumno modificado", alumnos[i])
+			json.NewEncoder(w).Encode(alumnos[i])
+			return
+		}
+	}
+
+	http.Error(w, "Alumno no encontrado", http.StatusNotFound)
 }

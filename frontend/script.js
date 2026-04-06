@@ -33,6 +33,7 @@ async function renderView(pageName) {
                     <label for="promedio">Promedio:</label>
                     <input type="number" id="promedio" name="promedio">
                     <button type="button" onclick="guardarAlumno()">Agregar</button>
+                    <button type="button" onclick="" class="btn_clear">Limpiar</button>
                 </form>
             </section>
             `
@@ -44,25 +45,29 @@ async function renderView(pageName) {
             dinamic_content.innerHTML = `
             <table class="table_alumnos">
                 <thead>
-                    <th>ID</th>
                     <th>Nombre</th>
                     <th>Edad</th>
                     <th>Carrera</th>
                     <th>Promedio</th>
                     <th>Aprobado</th>
+                    <th>Acciones</th>
                 </thead>
                 ${alumnos.map((alumno) => `
-                    <tr onclick="obtenerAlumnoPorId(${alumno.id})" style="cursor: pointer;">
-                        <td>${alumno.id}</td>
+                    <tr onclick="obtenerAlumnoPorId(${alumno.id})"style="cursor: pointer;">
                         <td>${alumno.nombre}</td>
                         <td>${alumno.edad}</td>
                         <td>${alumno.carrera}</td>
                         <td>${alumno.promedio}</td>
                         <td>${alumno.aprobado ? "Si" : "No"}</td>
+                        <td class="action-buttons">
+                            <button onclick="actualizarAlumno(${alumno.id})" class="btn_update">Actualizar</button>
+                            <button onclick="eliminarAlumno(${alumno.id})" class="btn_delete ">Eliminar</button>
+                        </td>
                     </tr>
                 `).join('')}
                 </tbody>
             </table>`
+
             break;
         case "Actualizar":
             break;
@@ -149,3 +154,111 @@ async function obtenerAlumnoPorId(alumnoId) {
     }
 }
 
+
+async function eliminarAlumno(alumnoId) {
+    const confirmado = await modalConfirmacion('¿Estás seguro de eliminar el alumno?');
+    if (confirmado) {
+        await borrarAlumno(alumnoId);
+        renderView("Mostrar")
+    }
+}
+
+async function borrarAlumno(alumnoId){
+    try {
+        let response = await fetch('http://localhost:8080/alumnos',{
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "id": alumnoId
+            })
+        })
+        let data = await response.json();
+        console.log("Alumno eliminado", data);
+        renderView("Mostrar");
+
+    } catch(err) {
+        console.log("Error al eliminar alumno", err);
+    }
+}
+
+async function actualizarAlumno(alumnoId){
+    let alumno = await obtenerAlumnoPorId(alumnoId);
+    renderView("Agregar");
+    
+    document.querySelector("#nombre").value = alumno.nombre;
+    document.querySelector("#edad").value = alumno.edad;
+    document.querySelector("#carrera").value = alumno.carrera;
+    document.querySelector("#promedio").value = alumno.promedio;
+
+    let btn_submit = document.querySelector(".inputs_form button[onclick='guardarAlumno()']");
+    if (btn_submit) {
+        btn_submit.textContent = "Actualizar";
+        btn_submit.setAttribute("onclick", `modificarAlumno(${alumnoId})`);
+    }
+}
+
+async function modificarAlumno(alumnoId) {
+    var nombre = document.querySelector("#nombre").value;
+    var edad = document.querySelector("#edad").value;
+    var carrera = document.querySelector("#carrera").value;
+    var promedio = document.querySelector("#promedio").value;
+
+    try {
+        const response = await fetch('http://localhost:8080/alumnos', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "id": alumnoId,
+                "nombre": nombre,
+                "edad": parseInt(edad),
+                "carrera": carrera,
+                "promedio": parseFloat(promedio)
+            })
+        });
+        const data = await response.json();
+        console.log('Alumno Modificado', data);
+        clearData();
+        renderView("Mostrar");
+
+    } catch (error) {
+        console.log("Error al modificar alumno", error);
+    }
+}
+
+let modalResolve;
+
+function modalConfirmacion(mensaje){
+    return new Promise((resolve) => {
+        modalResolve = resolve;
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'active_modal';
+        modalDiv.innerHTML = `
+        <div class="modal">
+            <div class="modal_content">
+                <p>${mensaje}</p>
+                <div class="modal_buttons">
+                    <button class="btn_cancelar" onclick="modalCancelar()">Cancelar</button>
+                    <button class="btn_aceptar" onclick="modalAceptar()">Aceptar</button>
+                </div>
+            </div>
+        </div>
+        `;
+        document.body.appendChild(modalDiv);
+    });
+}
+
+function modalCancelar() {
+    const modalDiv = document.getElementById('active_modal');
+    if (modalDiv) modalDiv.remove();
+    if (modalResolve) modalResolve(false);
+}
+
+function modalAceptar() {
+    const modalDiv = document.getElementById('active_modal');
+    if (modalDiv) modalDiv.remove();
+    if (modalResolve) modalResolve(true);
+}

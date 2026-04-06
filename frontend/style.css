@@ -7,6 +7,7 @@
 }
 
 body {
+    font-family: sans-serif;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -69,6 +70,7 @@ form {
 }
 
 form>button {
+    margin: 10px 5px 10px 5px;
     border-radius: 4px;
     border: none;
     background-color: var(--actions);
@@ -129,12 +131,100 @@ form>button:hover {
 
 td,
 th {
+    gap: 0;
     border-bottom: 1px solid black;
-    padding: 5px;
+    padding: 10px;
     text-align: center;
-
 }
 
+
+.show {
+    display: none;
+}
 tr:hover {
-    background-color: var(--featured);
+    background-color: #ccc9;
+}
+/* Botones de actualizar y eliminar */
+td>button {
+    border: none;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: space-around;
+}
+.btn_update {
+    background-color: #2563EB;
+    border-radius: 3px;
+    color: #fff;
+    padding: 5px;
+}
+.btn_update:hover {
+    scale: 1.1;
+}
+
+.btn_delete {
+    background-color: #f20;
+    border-radius: 3px;
+    color: #ccc
+    ;padding: 5px;
+}
+.btn_delete:hover {
+    scale: 1.1
+}
+
+/* Modal style */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.modal_content {
+    padding: 20px;
+    z-index: 1000;
+    background-color: var(--body-bg);
+    border-radius: 5px;
+    box-shadow: 0 0 10px #0004;
+    text-align: center;
+}
+
+.modal_buttons {
+    margin-top: 15px;
+}
+
+.btn_cancelar, .btn_aceptar {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 5px;
+    font-weight: bold;
+}
+
+.btn_cancelar {
+    background-color: #ccc;
+    color: #333;
+}
+
+.btn_cancelar:hover {
+    background-color: #bbb;
+}
+
+.btn_aceptar {
+    background-color: var(--actions);
+    color: white;
+}
+
+.btn_aceptar:hover {
+    background-color: #1d4ed8;
 }
