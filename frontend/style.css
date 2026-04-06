@@ -125,41 +125,55 @@ form>button:hover {
 }
 
 .table_alumnos {
-    width: 80%;
+    width: 90%;
+    border-collapse: collapse;
+}
 
+
+th {
+    background-color: var(--secondary);
 }
 
 td,
 th {
     gap: 0;
     border-bottom: 1px solid black;
-    padding: 10px;
+    padding: 5px;
     text-align: center;
+}
+
+td:first-child,
+th:first-child {
+    width: 30%;
+    text-align: left;
+    padding-left: 20px;
 }
 
 
 .show {
     display: none;
 }
+
 tr:hover {
     background-color: #ccc9;
 }
+
 /* Botones de actualizar y eliminar */
 td>button {
     border: none;
 }
 
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: space-around;
+.action-buttons button {
+    margin: 0 5px;
 }
+
 .btn_update {
     background-color: #2563EB;
     border-radius: 3px;
     color: #fff;
     padding: 5px;
 }
+
 .btn_update:hover {
     scale: 1.1;
 }
@@ -167,9 +181,10 @@ td>button {
 .btn_delete {
     background-color: #f20;
     border-radius: 3px;
-    color: #ccc
-    ;padding: 5px;
+    color: #ccc;
+    padding: 5px;
 }
+
 .btn_delete:hover {
     scale: 1.1
 }
@@ -202,7 +217,8 @@ td>button {
     margin-top: 15px;
 }
 
-.btn_cancelar, .btn_aceptar {
+.btn_cancelar,
+.btn_aceptar {
     padding: 8px 16px;
     border: none;
     border-radius: 4px;
@@ -227,4 +243,43 @@ td>button {
 
 .btn_aceptar:hover {
     background-color: #1d4ed8;
+}
+
+/* Toast Notifications */
+
+#toast_container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+}
+
+.toast {
+    padding: 15px 25px;
+    background-color: #10B981;
+    /* Verde esmeralda para éxito */
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transform: translateX(100%);
+    /* Empieza fuera de pantalla */
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    /* Animación elástica */
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.toast.error {
+    background-color: #EF4444;
+    /* Rojo para error */
+}
+
+.toast.visible {
+    opacity: 1;
+    transform: translateX(0);
+    /* Entra a la pantalla */
 }

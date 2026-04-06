@@ -99,10 +99,12 @@ async function guardarAlumno() {
             });
         const data = await response.json();
         console.log('Alumno Creado', data);
+        mostrarNotificacion('Alumno creado correctamente');
         clearData();
 
     } catch (error) {
         console.log("Error al crear alumno", error);
+        mostrarNotificacion('Error al crear el alumno', true);
     }
 
 }
@@ -144,7 +146,7 @@ async function obtenerAlumnoPorId(alumnoId) {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         var alumno = await response.json();
         console.log("Datos del alumno:", alumno);
         return alumno;
@@ -163,9 +165,9 @@ async function eliminarAlumno(alumnoId) {
     }
 }
 
-async function borrarAlumno(alumnoId){
+async function borrarAlumno(alumnoId) {
     try {
-        let response = await fetch('http://localhost:8080/alumnos',{
+        let response = await fetch('http://localhost:8080/alumnos', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json'
@@ -176,17 +178,19 @@ async function borrarAlumno(alumnoId){
         })
         let data = await response.json();
         console.log("Alumno eliminado", data);
+        mostrarNotificacion('Alumno eliminado correctamente');
         renderView("Mostrar");
 
-    } catch(err) {
+    } catch (err) {
         console.log("Error al eliminar alumno", err);
+        mostrarNotificacion('Error al eliminar alumno', true);
     }
 }
 
-async function actualizarAlumno(alumnoId){
+async function actualizarAlumno(alumnoId) {
     let alumno = await obtenerAlumnoPorId(alumnoId);
     renderView("Agregar");
-    
+
     document.querySelector("#nombre").value = alumno.nombre;
     document.querySelector("#edad").value = alumno.edad;
     document.querySelector("#carrera").value = alumno.carrera;
@@ -221,17 +225,19 @@ async function modificarAlumno(alumnoId) {
         });
         const data = await response.json();
         console.log('Alumno Modificado', data);
+        mostrarNotificacion('Alumno modificado correctamente');
         clearData();
         renderView("Mostrar");
 
     } catch (error) {
         console.log("Error al modificar alumno", error);
+        mostrarNotificacion('Error al modificar el alumno', true);
     }
 }
 
 let modalResolve;
 
-function modalConfirmacion(mensaje){
+function modalConfirmacion(mensaje) {
     return new Promise((resolve) => {
         modalResolve = resolve;
         const modalDiv = document.createElement('div');
@@ -261,4 +267,31 @@ function modalAceptar() {
     const modalDiv = document.getElementById('active_modal');
     if (modalDiv) modalDiv.remove();
     if (modalResolve) modalResolve(true);
+}
+
+function mostrarNotificacion(mensaje, isError = false) {
+    let container = document.getElementById("toast_container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast_container";
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast ${isError ? 'error' : ''}`;
+    toast.textContent = mensaje;
+
+    container.appendChild(toast);
+
+
+    setTimeout(() => {
+        toast.classList.add("visible");
+    }, 10);
+
+    setTimeout(() => {
+        toast.classList.remove("visible");
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
 }
