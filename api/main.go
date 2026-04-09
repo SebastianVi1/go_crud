@@ -32,7 +32,6 @@ func main() {
 	mux.HandleFunc("GET /alumnos", obtenerAlumnos)
 	mux.HandleFunc("GET /alumnos/{id}", obtenerAlumnoPorId)
 	mux.HandleFunc("POST /alumnos", crearAlumno)
-	mux.HandleFunc("PUT /alumnos", modificarAlumno)
 	mux.HandleFunc("DELETE /alumnos", borrarAlumno)
 
 	fmt.Println("Servidor corriendo en http://localhost:8080")

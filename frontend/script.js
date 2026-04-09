@@ -1,5 +1,7 @@
 console.log("connected")
-
+// cargar la lista desde el inicio
+renderView("Mostrar")
+document.querySelector(".btn_show:last-child").classList.add("isActive");
 const buttons = document.querySelectorAll(".navigation_btn>button")
 
 
@@ -43,30 +45,38 @@ async function renderView(pageName) {
             var alumnos = await obtenerAlumnos();
 
             dinamic_content.innerHTML = `
-            <table class="table_alumnos">
-                <thead>
-                    <th>Nombre</th>
-                    <th>Edad</th>
-                    <th>Carrera</th>
-                    <th>Promedio</th>
-                    <th>Aprobado</th>
-                    <th>Acciones</th>
-                </thead>
-                ${alumnos.map((alumno) => `
-                    <tr onclick="obtenerAlumnoPorId(${alumno.id})"style="cursor: pointer;">
-                        <td>${alumno.nombre}</td>
-                        <td>${alumno.edad}</td>
-                        <td>${alumno.carrera}</td>
-                        <td>${alumno.promedio}</td>
-                        <td>${alumno.aprobado ? "Si" : "No"}</td>
-                        <td class="action-buttons">
-                            <button onclick="actualizarAlumno(${alumno.id})" class="btn_update">Actualizar</button>
-                            <button onclick="eliminarAlumno(${alumno.id})" class="btn_delete ">Eliminar</button>
-                        </td>
-                    </tr>
-                `).join('')}
-                </tbody>
-            </table>`
+            <div class="table_container" style="width: 100%; display: flex; flex-direction: column; gap: 1rem;">
+                <div class="search_container" style="display: flex; justify-content: flex-end;">
+                    <input type="text" id="busquedaAlumno" oninput="filtrarAlumnos()" placeholder="Buscar alumno..." style="max-width: 300px;">
+                </div>
+                <table class="table_alumnos">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Edad</th>
+                            <th>Carrera</th>
+                            <th>Promedio</th>
+                            <th>Aprobado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    ${alumnos.map((alumno) => `
+                        <tr onclick="obtenerAlumnoPorId(${alumno.id})" style="cursor: pointer;">
+                            <td>${alumno.nombre}</td>
+                            <td>${alumno.edad}</td>
+                            <td>${alumno.carrera}</td>
+                            <td>${alumno.promedio}</td>
+                            <td>${alumno.aprobado ? "Si" : "No"}</td>
+                            <td class="action-buttons">
+                                <button onclick="actualizarAlumno(${alumno.id})" class="btn_update">Actualizar</button>
+                                <button onclick="eliminarAlumno(${alumno.id})" class="btn_delete ">Eliminar</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                    </tbody>
+                </table>
+            </div>`
 
             break;
         case "Actualizar":
@@ -294,4 +304,31 @@ function mostrarNotificacion(mensaje, isError = false) {
             toast.remove();
         }, 300);
     }, 3000);
+}
+
+function filtrarAlumnos() {
+    let input = document.getElementById("busquedaAlumno");
+    let filter = input.value.toLowerCase();
+    let table = document.querySelector(".table_alumnos");
+    if (!table) return;
+    
+    let tr = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < tr.length; i++) { // Comenzamos en 1 para saltar el thead tr
+        let tds = tr[i].getElementsByTagName("td");
+        let match = false;
+        for (let j = 0; j < tds.length - 1; j++) { // Saltamos la ultima columna (Acciones)
+            if (tds[j]) {
+                if (tds[j].textContent.toLowerCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+        }
+        if (match) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+    }
 }
